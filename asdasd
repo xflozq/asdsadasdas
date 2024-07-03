@@ -1,0 +1,48 @@
+-- Configuration
+local MONSTER_TAG = "Monster"  -- Tag used to identify monster parts
+local ESP_COLOR = Color3.fromRGB(255, 0, 0)  -- Color of the ESP (Red in this case)
+local ESP_TRANSPARENCY = 0.5  -- Transparency of the ESP
+
+-- Function to create a BillboardGui for ESP
+local function createESP(monsterPart)
+    local billboardGui = Instance.new("BillboardGui")
+    billboardGui.Size = UDim2.new(2, 0, 2, 0)  -- Size of the ESP indicator
+    billboardGui.AlwaysOnTop = true
+    billboardGui.StudsOffset = Vector3.new(0, 3, 0)  -- Offset above the part
+    billboardGui.Enabled = true
+
+    local espFrame = Instance.new("Frame", billboardGui)
+    espFrame.Size = UDim2.new(1, 0, 1, 0)
+    espFrame.BackgroundColor3 = ESP_COLOR
+    espFrame.BackgroundTransparency = ESP_TRANSPARENCY
+
+    billboardGui.Parent = monsterPart
+end
+
+-- Function to handle when a new monster is detected
+local function onMonsterAdded(monsterPart)
+    if monsterPart:IsA("BasePart") then
+        createESP(monsterPart)
+    end
+end
+
+-- Function to search for monsters in the workspace
+local function searchMonsters()
+    for _, child in pairs(game.Workspace:GetChildren()) do
+        if child:IsA("Model") and child:FindFirstChildWhichIsA("BasePart") and child:FindFirstChild("Humanoid") then
+            -- Check if the model has a humanoid (assuming it's a monster)
+            onMonsterAdded(child.PrimaryPart or child:FindFirstChildWhichIsA("BasePart"))
+        end
+    end
+end
+
+-- Start searching for monsters when the script is first run
+searchMonsters()
+
+-- Monitor for new monsters being added to the workspace
+game.Workspace.ChildAdded:Connect(function(child)
+    if child:IsA("Model") and child:FindFirstChildWhichIsA("BasePart") and child:FindFirstChild("Humanoid") then
+        -- Check if the model has a humanoid (assuming it's a monster)
+        onMonsterAdded(child.PrimaryPart or child:FindFirstChildWhichIsA("BasePart"))
+    end
+end)
